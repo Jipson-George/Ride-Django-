@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-b^ch%xr&uqxtx@2%u+17nys+vzvmm5_9h9zrxx-x7kt6bgge^2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -40,19 +40,21 @@ INSTALLED_APPS = [
     'rideApp',
     'rest_framework',
      'rest_framework_simplejwt',
+     'channels'
 ]
+ASGI_APPLICATION = 'Ride.wsgi.application'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+USE_ASGI = True
 ROOT_URLCONF = 'Ride.urls'
 
 REST_FRAMEWORK = {
@@ -84,6 +86,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Ride.wsgi.application'
 
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+# Add CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': "channels.layers.InMemoryChannelLayer",
+       
+    },
+}
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+ALLOWED_HOSTS = ['*']
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

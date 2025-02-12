@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from rideApp.models import Ride
+from rideApp.models import AvailableDriver, Ride
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -38,3 +38,11 @@ class RideMatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ride
         fields = ['driver', 'status']
+class AvailableDriverSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AvailableDriver
+        fields = '__all__'
+
+class RideRequestSerializer(serializers.Serializer):
+    pickup_latitude = serializers.DecimalField(max_digits=9, decimal_places=6)
+    pickup_longitude = serializers.DecimalField(max_digits=9, decimal_places=6)
