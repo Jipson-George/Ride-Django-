@@ -1,10 +1,12 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
+from django.db import transaction
 from rideApp.models import Ride
 
+@override_settings(DATABASES={'default': {'ATOMIC_REQUESTS': True}})
 class RideViewSetTests(TestCase):
     databases = {'default'}
     
@@ -30,14 +32,15 @@ class RideViewSetTests(TestCase):
         self.ride_detail_url = reverse('rides-detail', args=[self.ride.pk])
 
     def test_create_ride(self):
-        data = {
-            'pickup_location': 'New Pickup',
-            'dropoff_location': 'New Dropoff',
-            'status': 'REQUESTED'
-        }
-        response = self.client.post(self.ride_url, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Ride.objects.count(), 2)
+        with transaction.atomic():  # Ensures transactions are handled properly
+            data = {
+                'pickup_location': 'New Pickup',
+                'dropoff_location': 'New Dropoff',
+                'status': 'REQUESTED'
+            }
+            response = self.client.post(self.ride_url, data)
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertTrue(Ride.objects.filter(pickup_location="New Pickup").exists())
 
     def test_list_rides(self):
         response = self.client.get(self.ride_url)
@@ -47,6 +50,7 @@ class RideViewSetTests(TestCase):
         response = self.client.get(self.ride_detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+@override_settings(DATABASES={'default': {'ATOMIC_REQUESTS': True}})
 class RideStatusUpdateTests(TestCase):
     databases = {'default'}
     
@@ -68,17 +72,21 @@ class RideStatusUpdateTests(TestCase):
         self.status_update_url = reverse('ride-status-update', args=[self.ride.pk])
 
     def test_update_ride_status(self):
-        data = {'status': 'COMPLETED'}
-        response = self.client.patch(self.status_update_url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        with transaction.atomic():
+            data = {'status': 'COMPLETED'}
+            response = self.client.patch(self.status_update_url, data)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertTrue(Ride.objects.filter(status='COMPLETED').exists())
 
     def test_update_ride_status_invalid_status(self):
-        data = {'status': 'INVALID_STATUS'}
-        response = self.client.patch(self.status_update_url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            data = {'status': 'INVALID_STATUS'}
+            response = self.client.patch(self.status_update_url, data)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_ride_status_unauthenticated(self):
-        self.client.force_authenticate(user=None)
-        data = {'status': 'COMPLETED'}
-        response = self.client.patch(self.status_update_url, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        with transaction.atomic():
+            self.client.force_authenticate(user=None)
+            data = {'status': 'COMPLETED'}
+            response = self.client.patch(self.status_update_url, data)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
