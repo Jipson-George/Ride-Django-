@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rideApp.serializers import UserSerializer, LoginSerializer
 from django.contrib.auth import authenticate
 
-# User Registration API
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -25,7 +25,7 @@ class RegisterView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-# User Login API
+
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
