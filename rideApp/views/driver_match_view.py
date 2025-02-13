@@ -6,12 +6,14 @@ from math import radians, sin, cos, sqrt, atan2
 from rideApp.models import AvailableDriver
 from rideApp.serializers import AvailableDriverSerializer, RideRequestSerializer
 from django.utils import timezone
+
+
 class DriverMatchingViewSet(viewsets.ModelViewSet):
     queryset = AvailableDriver.objects.all()
     serializer_class = AvailableDriverSerializer
 
     def calculate_distance(self, lat1, lon1, lat2, lon2):
-        R = 6371  # Earth's radius in km
+        R = 6371  
         lat1, lon1, lat2, lon2 = map(radians, [float(lat1), float(lon1), float(lat2), float(lon2)])
         dlat = lat2 - lat1
         dlon = lon2 - lon1
@@ -33,7 +35,6 @@ class DriverMatchingViewSet(viewsets.ModelViewSet):
         if not available_drivers:
             return Response({"message": "No drivers available"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Calculate distances for all available drivers
         drivers_with_distance = []
         for driver in available_drivers:
             distance = self.calculate_distance(
@@ -47,7 +48,6 @@ class DriverMatchingViewSet(viewsets.ModelViewSet):
                 'distance': distance
             })
 
-        # Sort by distance first, then by last ride completion time
         sorted_drivers = sorted(
             drivers_with_distance,
             key=lambda x: (x['distance'], x['driver'].last_ride_completed_time or timezone.now())

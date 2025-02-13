@@ -3,7 +3,7 @@ from django.urls import path, re_path
 from rest_framework.routers import DefaultRouter
 from rideApp.views import (
     RegisterView, LoginView,
-    RideViewSet,RideStatusUpdateViewSet,RideMatchViewSet,RideTrackingViewSet,DriverMatchingViewSet
+    RideViewSet,RideStatusUpdateViewSet, DriverMatchingViewSet
     
 )
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -18,7 +18,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('rides/', RideViewSet.as_view({'get': 'list', 'post': 'create'}), name='ride-list'),
      path('rides/<int:pk>/update-status/', RideStatusUpdateViewSet.as_view({'patch': 'update_status'}), name='ride-status-update'),
-    path('rides/<int:pk>/match/', RideMatchViewSet.as_view({'post': 'match_ride'}), name='ride-match'),
     path('drivers/match_driver/', DriverMatchingViewSet.as_view({'post':'match_driver'}), name='driver_match'),
     path('driver/<int:pk>/accept_ride/', DriverMatchingViewSet.as_view({'post':'accept_ride'}), name='accept_ride')]
     #  path('ws/rides/<int:ride_id>/track/', LocationConsumer.as_asgi())]
